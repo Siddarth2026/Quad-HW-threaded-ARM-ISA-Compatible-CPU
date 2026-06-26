@@ -74,10 +74,10 @@ module pipeline_datapath_test1;
 		  instruction=32'he3a04004;
 		  #10
 		  instruction_address=8'h7;
-		  instruction=32'he4801001;
+		  instruction=32'he5801001;
 		  #10
 		  instruction_address=8'h8;
-		  instruction=32'he4903001;
+		  instruction=32'he5903001;
 		  #10
 		  instruction_address=8'h9;
 		  instruction=32'he320f000;
