@@ -18,13 +18,19 @@ This idle time can be reduced with multithreading. There are two main types of m
 
 Hardware multithreading hides latency by allowing other threads to execute while one thread is stalled, rather than leaving the pipeline idle. Since the probability of all four threads stalling or being flushed at the same time is low, the overall likelihood of the pipeline stalling is greatly reduced. This improves pipeline utilization and increases overall throughput without requiring additional execution units. This is more beneficial for designs with frequent memory accesses and branch instructions, where stalling and flushing occur often.
 
-## Architectural changes to a single-threaded pipeline
-There are a few major changes to the single-threaded 5-stage pipeline model to incorporate hardware multithreading. The changes to the model and new blocks integrated are listed below: 
+## Architectural Changes to a Single-Threaded Pipeline
 
-Thread ID: Round robin multithreading is implemented with 4 threads, so when the thread ID is enabled, the current thread increases by 1, till 3, and goes back to 0. The current thread is propagated through all pipeline stages to identify which thread is running at each stage. This information is needed for other blocks as well to prevent information from one thread from mixing with that from other threads.
+There are a few major changes to the single-threaded 5-stage pipeline model to incorporate hardware multithreading. The new blocks and modifications to the existing design are listed below.
 
-Program Counter (PC): Instead of a single Program Counter, 4 program counters are used, where the PC is selected based on the thread ID. This is used in cases of stalling or branching, where only the PC of the particular thread is updated, and the other threads are unaffected. This also keeps each instruction stream independent.
+* **Thread ID:** Round-robin multithreading is implemented with four threads. Whenever the thread ID is enabled, the current thread ID increments by one, wraps from 3 back to 0, and repeats. The current thread ID is propagated through all pipeline stages to identify which thread is executing at each stage. This information is also used by other blocks to ensure data from one thread is never mixed with that of another.
 
-Register file: A single register file is now split into 4 individual register files, one per thread. The current thread selects which register file to use for read and write-back operations. With each thread having its own register file, there is no switching overhead, and the pipeline can easily switch between threads. There is no shared register state to save or restore between threads.
+* **Program Counter (PC):** Instead of a single program counter, four program counters are used, with the active PC selected based on the current thread ID. During stalling or branching, only the PC belonging to the affected thread is updated, while the remaining threads continue execution normally. This keeps each instruction stream independent.
 
-Per thread NZCV Flags: 
+* **Register File:** The single register file is replaced with four independent register files, one for each thread. The current thread ID selects which register file is used for register reads and write-back operations. Since each thread has its own register file, there is no context-switching overhead or shared register state to save or restore.
+
+* **Per-Thread NZCV Flags:** The single set of NZCV flags is extended to four independent sets, one for each thread. This prevents flag updates from one thread from affecting another during conditional branch evaluation. Only the NZCV flags from the current thread are checked against the instruction's condition field.
+
+* **Hazard Detection Unit:** The Hazard Detection Unit is modified so that hazards are detected only between instructions belonging to the same thread. This prevents unnecessary stalls caused by dependencies between different threads.
+
+* **Forwarding Unit:** The Forwarding Unit is similarly modified to forward data only between instructions from the same thread. This ensures that forwarded values always belong to the correct thread and prevents data from one thread from being forwarded to another.
+
