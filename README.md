@@ -23,7 +23,8 @@ There are a few major changes to the single-threaded 5-stage pipeline model to i
 
 Thread ID: Round robin multithreading is implemented with 4 threads, so when the thread ID is enabled, the current thread increases by 1, till 3, and goes back to 0. The current thread is propagated through all pipeline stages to identify which thread is running at each stage. This information is needed for other blocks as well to prevent information from one thread from mixing with that from other threads.
 
-Program Counter(PC): 
+Program Counter (PC): Instead of a single Program Counter, 4 program counters are used, where the PC is selected based on the thread ID. This is used in cases of stalling or branching, where only the PC of the particular thread is updated, and the other threads are unaffected. This also keeps each instruction stream independent.
 
 Register file: A single register file is now split into 4 individual register files, one per thread. The current thread selects which register file to use for read and write-back operations. With each thread having its own register file, there is no switching overhead, and the pipeline can easily switch between threads. There is no shared register state to save or restore between threads.
 
+Per thread NZCV Flags: 
