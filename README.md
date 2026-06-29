@@ -19,4 +19,11 @@ This idle time can be reduced with multithreading. There are two main types of m
 Hardware multithreading hides latency by allowing other threads to execute while one thread is stalled, rather than leaving the pipeline idle. Since the probability of all four threads stalling or being flushed at the same time is low, the overall likelihood of the pipeline stalling is greatly reduced. This improves pipeline utilization and increases overall throughput without requiring additional execution units. This is more beneficial for designs with frequent memory accesses and branch instructions, where stalling and flushing occur often.
 
 ## Architectural changes to a single-threaded pipeline
+There are a few major changes to the single-threaded 5-stage pipeline model to incorporate hardware multithreading. The changes to the model and new blocks integrated are listed below: 
+
+Thread ID: Round robin multithreading is implemented with 4 threads, so when the thread ID is enabled, the current thread increases by 1, till 3, and goes back to 0. The current thread is propagated through all pipeline stages to identify which thread is running at each stage. This information is needed for other blocks as well to prevent information from one thread from mixing with that from other threads.
+
+Program Counter(PC): 
+
+Register file: A single register file is now split into 4 individual register files, one per thread. The current thread selects which register file to use for read and write-back operations. With each thread having its own register file, there is no switching overhead, and the pipeline can easily switch between threads. There is no shared register state to save or restore between threads.
 
