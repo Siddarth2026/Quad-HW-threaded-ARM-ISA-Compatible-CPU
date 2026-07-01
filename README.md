@@ -20,6 +20,8 @@ Hardware multithreading hides latency by allowing other threads to execute while
 
 ## Architectural Changes to a Single-Threaded Pipeline
 ![Quad HW threaded pipeline datapath](4Tpipelinedatapath-clean.png)
+
+
 There are a few major changes to the single-threaded 5-stage pipeline model to incorporate hardware multithreading. The new blocks and modifications to the existing design are listed below.
 
 * **Thread ID:** Round-robin multithreading is implemented with four threads. Whenever the thread ID is enabled, the current thread ID increments by one, wraps from 3 back to 0, and repeats. The current thread ID is propagated through all pipeline stages to identify which thread is executing at each stage. This information is also used by other blocks to ensure data from one thread is never mixed with that of another.
